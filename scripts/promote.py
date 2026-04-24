@@ -5,11 +5,11 @@ Scans local knowledge articles, identifies those with technology/framework
 scope (via tags or explicit frontmatter), copies them to the global KB at
 ~/.claude/knowledge-base/, updates the global index, commits, and pushes.
 
-Usage:
-    uv run python promote.py                    # promote eligible articles
-    uv run python promote.py --dry-run          # show what would be promoted
-    uv run python promote.py --list             # list articles with scope classification
-    uv run python promote.py --force <slug>     # force-promote a specific article
+Usage (from project root):
+    uv run --directory claude-memory-compiler python scripts/promote.py
+    uv run --directory claude-memory-compiler python scripts/promote.py --dry-run
+    uv run --directory claude-memory-compiler python scripts/promote.py --list
+    uv run --directory claude-memory-compiler python scripts/promote.py --force <slug>
 """
 
 from __future__ import annotations
@@ -22,7 +22,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-ROOT_DIR = Path(__file__).resolve().parent
+# Paths (this script lives at claude-memory-compiler/scripts/promote.py)
+ROOT_DIR = Path(__file__).resolve().parent.parent
 KNOWLEDGE_DIR = ROOT_DIR / "knowledge"
 
 GLOBAL_KB_DIR = Path.home() / ".claude" / "knowledge-base"
