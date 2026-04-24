@@ -180,19 +180,37 @@ def _settings_has_hooks(settings_path: Path) -> tuple[bool, list[str]]:
 
 
 def check_settings_wired() -> Result:
-    """Check that at least one settings.json has all three hook events."""
-    candidates = [("project", PROJECT_SETTINGS), ("compiler", COMPILER_SETTINGS)]
-    for label, path in candidates:
-        if path.exists():
-            ok, missing = _settings_has_hooks(path)
-            if ok:
-                return Result(f"hooks wired ({label})", "ok", detail=str(path))
-            return Result(f"hooks wired ({label})", "fail",
-                          detail=f"{path} missing events: {', '.join(missing)}",
-                          hint="See INSTALL.md section 'Wire the hooks'.")
+    """Check that the project (preferred) or compiler settings.json wires all
+    three hook events. The integrated layout is the documented scenario, so
+    we prefer the project-root settings; a compiler-root settings.json only
+    counts when the compiler is the project (standalone)."""
+    if PROJECT_SETTINGS.exists():
+        ok, missing = _settings_has_hooks(PROJECT_SETTINGS)
+        if ok:
+            return Result("hooks wired (project)", "ok", detail=str(PROJECT_SETTINGS))
+        return Result("hooks wired (project)", "fail",
+                      detail=f"{PROJECT_SETTINGS} missing events: {', '.join(missing)}",
+                      hint=("Replace or merge with "
+                            f"{ROOT / 'settings.integrated.example.json'} "
+                            "(see INSTALL.md §4)."))
+    # Standalone mode: no sibling project settings, but the compiler itself
+    # carries a .claude/settings.json that Claude Code would load when run
+    # from the compiler dir directly.
+    if COMPILER_SETTINGS.exists():
+        ok, missing = _settings_has_hooks(COMPILER_SETTINGS)
+        if ok:
+            return Result("hooks wired (standalone)", "warn",
+                          detail=f"using {COMPILER_SETTINGS} — ok for testing the "
+                                 "compiler standalone, but the integrated flow "
+                                 "expects project-root settings",
+                          hint=f"For project use: cp {ROOT / 'settings.integrated.example.json'} {PROJECT_SETTINGS}")
+        return Result("hooks wired (standalone)", "fail",
+                      detail=f"{COMPILER_SETTINGS} missing events: {', '.join(missing)}")
     return Result("hooks wired", "fail",
-                  detail="no .claude/settings.json found in project or compiler",
-                  hint=f"Create {PROJECT_SETTINGS} (see INSTALL.md).")
+                  detail=f"no .claude/settings.json at {PROJECT_SETTINGS}",
+                  hint=("cp "
+                        f"{ROOT / 'settings.integrated.example.json'} "
+                        f"{PROJECT_SETTINGS} (or merge into an existing one)."))
 
 
 def check_session_start_executes() -> Result:

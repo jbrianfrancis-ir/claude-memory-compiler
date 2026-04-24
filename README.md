@@ -12,6 +12,14 @@ This repo is the **per-project compiler**. It pairs with the cross-machine [`cla
 
 See **[claude-knowledge-base/INSTALL.md](https://github.com/jbrianfrancis-ir/claude-knowledge-base/blob/main/INSTALL.md)** for the authoritative step-by-step install guide (global KB setup, per-project clone, hook wiring, verification).
 
+Hook wiring uses the template file shipped at the root of this repo:
+
+```bash
+cp claude-memory-compiler/settings.integrated.example.json .claude/settings.json
+```
+
+The `.claude/settings.json` inside this repo is only for standalone use (running Claude Code from the compiler dir itself, e.g. for testing). Don't copy that one into your project.
+
 Quick version for an AI coding agent:
 
 > "Clone https://github.com/jbrianfrancis-ir/claude-memory-compiler into this project. Follow INSTALL.md in https://github.com/jbrianfrancis-ir/claude-knowledge-base to wire the hooks. Then run `uv run --directory claude-memory-compiler python scripts/check_install.py` to verify."
